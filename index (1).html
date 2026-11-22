@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Kalkulator snage pojačala – Emi Guitars</title>
+<style>
+  :root{
+    --bg:#121417; --card:#1c1f24; --line:#2c3138; --txt:#e8eaed; --mut:#9aa1aa;
+    --acc:#f5b400; --ok:#3ecf6e; --warn:#ffb020; --bad:#ff5a5a; --in:#0f1114;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:18px}
+  header{padding:18px 20px 10px;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:24px;letter-spacing:.3px}
+  header h1 span{color:var(--acc)}
+  header p{margin:4px 0 0;color:var(--mut);font-size:14px}
+  main{max-width:860px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  .card h2{margin:0 0 14px;font-size:19px;display:flex;align-items:center;gap:10px}
+  .badge{background:var(--acc);color:#111;border-radius:6px;padding:2px 8px;font-size:13px;font-weight:700}
+  label.l{display:block;color:var(--mut);font-size:14px;margin:12px 0 6px}
+  .seg{display:flex;flex-wrap:wrap;gap:8px}
+  .seg button{flex:1 1 auto;min-width:72px;padding:14px 12px;font-size:17px;border-radius:10px;border:1px solid var(--line);background:var(--in);color:var(--txt);cursor:pointer}
+  .seg button.on{background:var(--acc);color:#111;border-color:var(--acc);font-weight:700}
+  input[type=text]{width:100%;padding:14px;font-size:24px;border-radius:10px;border:1px solid var(--line);background:var(--in);color:var(--txt)}
+  input[type=text]:focus{outline:2px solid var(--acc);border-color:transparent}
+  .row{display:flex;gap:10px;align-items:center}
+  .row input{flex:1}
+  .unit{min-width:44px;color:var(--mut);font-size:20px}
+  .big{margin-top:16px;padding:16px;border-radius:12px;background:var(--in);border:1px solid var(--line);text-align:center}
+  .big .v{font-size:52px;font-weight:800;color:var(--acc);line-height:1.1}
+  .big .s{color:var(--mut);font-size:14px;margin-top:4px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .grid div{background:var(--in);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+  .grid b{display:block;font-size:20px}
+  .grid small{color:var(--mut);font-size:13px}
+  .note{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:15px;display:none}
+  .note.warn{display:block;background:rgba(255,176,32,.12);border:1px solid var(--warn);color:#ffd27a}
+  .cmp{margin-top:10px;padding:12px;border-radius:10px;font-size:18px;text-align:center;display:none;border:1px solid var(--line)}
+  .cmp.ok{display:block;background:rgba(62,207,110,.12);border-color:var(--ok)}
+  .cmp.mid{display:block;background:rgba(255,176,32,.12);border-color:var(--warn)}
+  .cmp.bad{display:block;background:rgba(255,90,90,.12);border-color:var(--bad)}
+  .custom{margin-top:8px;display:none}
+  .custom.show{display:flex}
+  footer{color:var(--mut);font-size:13px;text-align:center;padding:10px 16px 26px;line-height:1.5}
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px}
+  #gate .box{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;text-align:center}
+  #gate .logo{font-size:30px;font-weight:800;letter-spacing:.5px;margin-bottom:4px}
+  #gate .logo span{color:var(--acc)}
+  #gate p{color:var(--mut);margin:0 0 18px;font-size:15px}
+  #gate input{text-align:center;letter-spacing:3px}
+  #gate button{width:100%;margin-top:12px;padding:14px;font-size:18px;border-radius:10px;border:0;background:var(--acc);color:#111;font-weight:700;cursor:pointer}
+  #gate .err{color:var(--bad);min-height:22px;margin-top:10px;font-size:15px}
+  body.locked main, body.locked header, body.locked footer{display:none !important}
+  body:not(.locked) #gate{display:none !important}
+  body.locked{overflow:hidden}
+  #gate .rem{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;color:var(--txt);font-size:16px}
+  #gate .rem input{width:22px;height:22px;accent-color:var(--acc)}
+  #logout{float:right;background:transparent;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
+  @media (max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}.big .v{font-size:42px}}
+</style>
+</head>
+<body class="locked">
+<div id="gate">
+  <form class="box" id="gateForm" autocomplete="off">
+    <div class="logo">EMI <span>GUITARS</span></div>
+    <p>Kalkulator snage pojačala</p>
+    <input type="password" id="pw" inputmode="numeric" placeholder="Lozinka">
+    <label class="rem"><input type="checkbox" id="remember"> Zapamti lozinku na ovom uređaju</label>
+    <button type="submit">Ulaz</button>
+    <div class="err" id="pwErr"></div>
+  </form>
+</div>
+<header>
+  <button id="logout" type="button">Odjava</button>
+  <h1>Kalkulator snage <span>pojačala</span></h1>
+  <p>Emi Guitars · mjerenje na dummy loadu, sinus 1 kHz</p>
+</header>
+<main>
+
+  <!-- LOAD (zajednički) -->
+  <section class="card">
+    <h2>Load</h2>
+    <div class="seg" id="loadSeg">
+      <button data-r="4" class="on">4 Ω</button>
+      <button data-r="8">8 Ω</button>
+      <button data-r="16">16 Ω</button>
+      <button data-r="custom">Ručno</button>
+    </div>
+    <div class="row custom" id="customRow">
+      <input type="text" id="customR" inputmode="decimal" placeholder="npr. 3,9">
+      <span class="unit">Ω</span>
+    </div>
+  </section>
+
+  <!-- 1. IZMJERENO -->
+  <section class="card">
+    <h2><span class="badge">1</span> Izmjereno → snaga</h2>
+    <label class="l">Što si očitao</label>
+    <div class="seg" id="unitSeg">
+      <button data-u="rms" class="on">Per.Vrms / Vrms</button>
+      <button data-u="pp">Vpp</button>
+      <button data-u="pk">Vpeak (Vmax)</button>
+      <button data-u="irms">Irms</button>
+    </div>
+    <label class="l" id="valLabel">Vrijednost</label>
+    <div class="row">
+      <input type="text" id="val" inputmode="decimal" placeholder="npr. 39">
+      <span class="unit" id="valUnit">V</span>
+    </div>
+
+    <div class="big">
+      <div class="v" id="pOut">– W</div>
+      <div class="s" id="pSub">upiši vrijednost</div>
+      <div class="s" style="font-size:18px;margin-top:8px;color:var(--txt)">Peak power: <b id="pkOut">–</b> <span style="color:var(--mut);font-size:14px">(= 2 × RMS, brojka koju proizvođači često pišu)</span></div>
+    </div>
+    <div class="grid">
+      <div><b id="oRms">–</b><small>Vrms</small></div>
+      <div><b id="oPp">–</b><small>Vpp</small></div>
+      <div><b id="oPk">–</b><small>Vpeak</small></div>
+      <div><b id="oI">–</b><small>Irms</small></div>
+    </div>
+    <div class="note" id="sineWarn">⚠ Vpp i Vpeak vrijede samo za <b>čisti sinus bez clippinga</b>. Kad signal clipa, koristi <b>Per.Vrms</b> – on daje stvarnu snagu.</div>
+    <div class="cmp" id="cmp"></div>
+  </section>
+
+  <!-- 2. CILJ -->
+  <section class="card">
+    <h2><span class="badge">2</span> Nazivna snaga → što trebaš vidjeti na scopeu</h2>
+    <label class="l">Nazivna snaga proizvođača</label>
+    <div class="row">
+      <input type="text" id="rated" inputmode="decimal" placeholder="npr. 500">
+      <span class="unit">W</span>
+    </div>
+    <label class="l">Kako je proizvođač naveo snagu</label>
+    <div class="seg" id="specSeg">
+      <button data-k="1" class="on">RMS / Continuous</button>
+      <button data-k="0.8">RMS @ 10 % THD</button>
+      <button data-k="0.5" data-n="prog">Program / Music</button>
+      <button data-k="0.5" data-n="peak">Peak</button>
+    </div>
+    <div class="big">
+      <div class="v" id="expOut">– W</div>
+      <div class="s" id="expSub">očekivana kontinuirana snaga (početak clippinga)</div>
+    </div>
+    <label class="l">Ciljne vrijednosti na scopeu za očekivanu snagu</label>
+    <div class="grid">
+      <div><b id="tRms">–</b><small>Per.Vrms</small></div>
+      <div><b id="tPp">–</b><small>Vpp</small></div>
+      <div><b id="tPk">–</b><small>Vpeak</small></div>
+      <div><b id="tI">–</b><small>Irms</small></div>
+    </div>
+    <div class="note warn" style="display:block;background:transparent;border-color:var(--line);color:var(--mut)">
+      Faktori su <b>procjena</b>: RMS ×1 · RMS @ 10 % THD ×0,8 · Program/Music ×0,5 · Peak ×0,5.<br>
+      Usporedba u dijelu 1 radi prema očekivanoj kontinuiranoj snazi.<br>
+      Class D pojačala sa SMPS-om često ne drže punu snagu dugo na sinusu – test na punoj snazi drži kratko (nekoliko sekundi).
+    </div>
+  </section>
+
+</main>
+<footer>
+  P = Vrms² / R · Vrms = Vpp / 2√2 = Vpeak / √2 · P = Irms² · R<br>
+  Ground clip scopea spajaj na minus izlaza samo ako izlaz nije BTL (minus ≈ 0 Ω prema šasiji).
+</footer>
+
+<script>
+(function(){
+  var H = 'b252721ea83dbaba40610088cd035555482914b97859e6624aa989df51eb858c';
+  function hex(buf){ return Array.prototype.map.call(new Uint8Array(buf), function(b){return ('0'+b.toString(16)).slice(-2)}).join(''); }
+  var KEY='snaga_auth';
+  function remembered(){ try{ return localStorage.getItem(KEY)===H; }catch(e){ return false; } }
+  // jedno stanje (klasa na body) upravlja i ekranom lozinke i aplikacijom - nikad oboje odjednom
+  function unlock(){ document.body.classList.remove('locked'); document.getElementById('pw').blur(); window.scrollTo(0,0); }
+  function lock(){
+    document.body.classList.add('locked');
+    document.getElementById('pw').value=''; document.getElementById('pwErr').textContent='';
+    window.scrollTo(0,0);
+  }
+  if(remembered()) unlock(); else lock();
+  // bez "Zapamti": zaključaj čim aplikacija ode u pozadinu
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && !remembered()) lock(); });
+  window.addEventListener('pageshow', function(){ if(remembered()) unlock(); else lock(); });
+  document.getElementById('gateForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = document.getElementById('pw').value.trim();
+    if(!(window.crypto && crypto.subtle)){ document.getElementById('pwErr').textContent='Preglednik ne podržava provjeru lozinke.'; return; }
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)).then(function(b){
+      if(hex(b)===H){
+        try{ if(document.getElementById('remember').checked) localStorage.setItem(KEY,H); else localStorage.removeItem(KEY); }catch(e){}
+        unlock();
+      } else { document.getElementById('pwErr').textContent='Kriva lozinka'; document.getElementById('pw').value=''; }
+    });
+  });
+  document.getElementById('logout').addEventListener('click', function(){ try{localStorage.removeItem(KEY)}catch(e){} lock(); });
+})();
+(function(){
+  var R = 4, unit = 'rms', K = 1, specIdx = 0;
+  var $ = function(id){return document.getElementById(id)};
+  var SQ2 = Math.SQRT2;
+
+  function num(s){
+    if(s==null) return NaN;
+    s = String(s).trim().replace(/\s/g,'').replace(',', '.');
+    if(s==='') return NaN;
+    return parseFloat(s);
+  }
+  function f(x, d){
+    if(!isFinite(x)) return '–';
+    if(d===undefined){ d = x>=100 ? 1 : (x>=10 ? 2 : 3); }
+    return x.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d});
+  }
+  function fw(p){
+    if(!isFinite(p)) return '– W';
+    var d = p>=100 ? 0 : (p>=10 ? 1 : 2);
+    return p.toLocaleString('hr-HR',{minimumFractionDigits:d,maximumFractionDigits:d}) + ' W';
+  }
+  function getR(){
+    if(R==='custom'){ var v = num($('customR').value); return v>0 ? v : NaN; }
+    return R;
+  }
+
+  var labels = {
+    rms:['Per.Vrms / Vrms','V'],
+    pp:['Vpp (peak-to-peak)','V'],
+    pk:['Vpeak (0 do vrha, Vmax)','V'],
+    irms:['Irms (strujna kliješta)','A']
+  };
+
+  function calc(){
+    var r = getR();
+    var v = num($('val').value);
+    var vrms = NaN;
+    if(v>0 && r>0){
+      if(unit==='rms') vrms = v;
+      else if(unit==='pp') vrms = v/(2*SQ2);
+      else if(unit==='pk') vrms = v/SQ2;
+      else if(unit==='irms') vrms = v*r;
+    }
+    var p = vrms*vrms/r;
+    $('pOut').textContent = fw(p);
+    $('pkOut').textContent = fw(2*p);
+    $('pSub').textContent = isFinite(p) ? ('na ' + f(r, r%1?2:0) + ' Ω') : (r>0 ? 'upiši vrijednost' : 'upiši load');
+    $('oRms').textContent = f(vrms);
+    $('oPp').textContent  = f(vrms*2*SQ2);
+    $('oPk').textContent  = f(vrms*SQ2);
+    $('oI').textContent   = f(vrms/r);
+
+    $('sineWarn').className = 'note' + ((unit==='pp'||unit==='pk') ? ' warn' : '');
+
+    // cilj
+    var wRated = num($('rated').value);
+    var w = wRated>0 ? wRated*K : NaN;
+    $('expOut').textContent = (w>0) ? ('≈ ' + fw(w)) : '– W';
+    $('expSub').textContent = (w>0 && K!==1)
+      ? (fw(wRated) + ' × ' + f(K,1) + ' = očekivana kontinuirana snaga (procjena)')
+      : 'očekivana kontinuirana snaga (početak clippinga)';
+    var tv = (w>0 && r>0) ? Math.sqrt(w*r) : NaN;
+    $('tRms').textContent = f(tv);
+    $('tPp').textContent  = f(tv*2*SQ2);
+    $('tPk').textContent  = f(tv*SQ2);
+    $('tI').textContent   = f(tv/r);
+
+    // usporedba
+    var c = $('cmp');
+    if(isFinite(p) && p>0 && w>0){
+      var pct = p/w*100, db = 10*Math.log10(p/w);
+      c.innerHTML = fw(p) + ' = <b>' + f(pct,0) + ' %</b> ' + (K===1 ? 'nazivne' : 'očekivane') + ' (' + (db>=0?'+':'') + f(db,1) + ' dB)';
+      c.className = 'cmp ' + (pct>=90 ? 'ok' : (pct>=70 ? 'mid' : 'bad'));
+    } else { c.className = 'cmp'; c.innerHTML=''; }
+
+    try{
+      localStorage.setItem('snaga_state', JSON.stringify({R:R, unit:unit, k:specIdx, c:$('customR').value, v:$('val').value, w:$('rated').value}));
+    }catch(e){}
+  }
+
+  function setSeg(segId, attr, val){
+    var bs = $(segId).querySelectorAll('button');
+    for(var i=0;i<bs.length;i++){ bs[i].classList.toggle('on', bs[i].getAttribute(attr)==String(val)); }
+  }
+  function setUnit(u){
+    unit = u; setSeg('unitSeg','data-u',u);
+    $('valLabel').textContent = labels[u][0];
+    $('valUnit').textContent = labels[u][1];
+  }
+  function setR(r){
+    R = (r==='custom') ? 'custom' : Number(r);
+    setSeg('loadSeg','data-r',r);
+    $('customRow').classList.toggle('show', R==='custom');
+  }
+
+  $('loadSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    setR(b.getAttribute('data-r')); calc();
+    if(R==='custom') $('customR').focus();
+  });
+  $('unitSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    setUnit(b.getAttribute('data-u')); calc(); $('val').focus();
+  });
+  function setSpec(i){
+    var bs = $('specSeg').querySelectorAll('button');
+    if(!bs[i]) i = 0;
+    for(var j=0;j<bs.length;j++) bs[j].classList.toggle('on', j===i);
+    specIdx = i; K = parseFloat(bs[i].getAttribute('data-k'));
+  }
+  $('specSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    var bs = Array.prototype.slice.call($('specSeg').querySelectorAll('button'));
+    setSpec(bs.indexOf(b)); calc();
+  });
+  ['val','rated','customR'].forEach(function(id){ $(id).addEventListener('input', calc); });
+
+  // vrati zadnje stanje
+  try{
+    var s = JSON.parse(localStorage.getItem('snaga_state')||'null');
+    if(s){
+      $('customR').value = s.c||''; $('val').value = s.v||''; $('rated').value = s.w||'';
+      setR(s.R==='custom' ? 'custom' : (s.R||4)); setUnit(s.unit||'rms'); setSpec(s.k||0);
+    }
+  }catch(e){}
+  calc();
+})();
+</script>
+</body>
+</html>
